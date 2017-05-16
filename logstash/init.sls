@@ -19,13 +19,6 @@ logstash-pkg:
 # so we'll do a pattern replace.
 
 {%- if salt['grains.get']('os', None) == "Ubuntu" %}
-change service group in Ubuntu init script:
-  file.replace:
-    - name: /etc/init.d/logstash
-    - pattern: "LS_GROUP=logstash"
-    - repl: "LS_GROUP=adm"
-    - watch_in:
-      - service: logstash-svc
 
 add adm group to logstash service account:
   user.present:
