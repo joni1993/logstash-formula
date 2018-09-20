@@ -1,7 +1,12 @@
 ---
 logstash:
+  java: openjdk-8-jre-headless
+  use_upstream_repo: True
+  repo:
+      version: major or minor version number
+      old_repo: False
   inputs:
-    - 
+    -
       plugin_name: file
       path:
         - /var/log/syslog
@@ -23,13 +28,34 @@ logstash:
         message: '%{IPORHOST:clientip} %{USER:ident} %{USER:auth} \[%{HTTPDATE:timestamp}\] \"(?:%{WORD:verb} %{URIPATHPARAM:request}(?: HTTP/%{NUMBER:httpversion})?|-)\" %{NUMBER:response} (?:%{NUMBER:bytes}|-) \"(?:%{URI:referrer}|-)\" %{QS:agent}'
       add_field:
         received_at: '%{@timestamp}'
-        received_from: '%{host}'        
+        received_from: '%{host}'
     -
       plugin_name: date
       match:
         - 'syslog_timestamp'
         - 'MMM  d HH:mm:ss'
-        - 'MMM dd HH:mm:ss'
+        - 'MMM dd HH:mm:ss'        
+    -
+      plugin_name: mutate
+      cond: 'if [type] == "syslog"'
+      gsub:
+        - "message"
+        #extra escape charactor required to write from pillar to logstash config
+        - "\\/"
+        - "_"    
+    -
+      plugin_name: mutate
+      cond: 'if [type] == "syslog"'
+      remove_field:
+        - starting
+        - ending
+    -
+      plugin_name: mutate
+      cond: 'if [type] == "syslog" and "apache" in [source]'
+      add_field:
+        user: "%{auth}"
+      remove_field: ["auth"]
+      
   outputs:
     -
       plugin_name: lumberjack
