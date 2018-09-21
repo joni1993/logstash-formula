@@ -1,4 +1,4 @@
-{%- from 'logstash/map.jinja' import logstash with context %}
+{%- from tpldir + '/map.jinja' import logstash with context %}
 
 {%- if logstash.use_upstream_repo %}
 include:
@@ -44,8 +44,10 @@ logstash-config-inputs:
     - user: root
     - group: root
     - mode: 755
-    - source: salt://logstash/files/01-inputs.conf
+    - source: salt://{{ tpldir }}/files/01-inputs.conf
     - template: jinja
+    - context:
+      tpldir: {{ tpldir }}
     - require:
       - pkg: logstash-pkg
 {%- else %}
@@ -61,8 +63,10 @@ logstash-config-filters:
     - user: root
     - group: root
     - mode: 755
-    - source: salt://logstash/files/02-filters.conf
+    - source: salt://{{ tpldir }}/files/02-filters.conf
     - template: jinja
+    - context:
+      tpldir: {{ tpldir }}
     - require:
       - pkg: logstash-pkg
 {%- else %}
@@ -78,8 +82,10 @@ logstash-config-outputs:
     - user: root
     - group: root
     - mode: 755
-    - source: salt://logstash/files/03-outputs.conf
+    - source: salt://{{ tpldir }}/files/03-outputs.conf
     - template: jinja
+    - context:
+      tpldir: {{ tpldir }}
     - require:
       - pkg: logstash-pkg
 {%- else %}
